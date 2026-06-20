@@ -12,6 +12,9 @@
 
   <ItemGroup>
     <Folder Include="Managers\" />
+    <Folder Include="DTOs\" />
+    <Folder Include="Validators\" />
+    <Folder Include="ServiceExtension\" />
   </ItemGroup>
 
 </Project>
