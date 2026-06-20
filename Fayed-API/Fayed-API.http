@@ -1,0 +1,6 @@
+@Fayed_API_HostAddress = http://localhost:5194
+
+GET {{Fayed_API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
