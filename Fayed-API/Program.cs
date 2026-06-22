@@ -1,3 +1,4 @@
+using BLL.ServiceExtension;
 
 namespace Fayed_API
 {
@@ -7,11 +8,13 @@ namespace Fayed_API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
+            // Presentation services.
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+
+            // Wire up the application layers (BLL pulls in the DAL).
+            // This is the single composition root for IoC — each layer registers its own services.
+            builder.Services.AddBusinessLogicLayer(builder.Configuration);
 
             var app = builder.Build();
 
@@ -24,7 +27,6 @@ namespace Fayed_API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

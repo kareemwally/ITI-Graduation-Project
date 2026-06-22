@@ -1,0 +1,23 @@
+## .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+
+## Rider / VS / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+
+## EF Core
+*.db
+*.db-shm
+*.db-wal
+
+## OS
+.DS_Store
+Thumbs.db
