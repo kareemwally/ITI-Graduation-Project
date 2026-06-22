@@ -1,6 +1,20 @@
 @Fayed_API_HostAddress = http://localhost:5194
 
-GET {{Fayed_API_HostAddress}}/weatherforecast/
+### List published listings (paged)
+GET {{Fayed_API_HostAddress}}/api/listings?page=1&pageSize=20
 Accept: application/json
+
+### Get the category tree
+GET {{Fayed_API_HostAddress}}/api/categories/tree
+Accept: application/json
+
+### Create a category
+POST {{Fayed_API_HostAddress}}/api/categories
+Content-Type: application/json
+
+{
+  "name": "Rubber",
+  "parentId": null
+}
 
 ###
