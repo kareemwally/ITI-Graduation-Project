@@ -22,6 +22,7 @@ namespace BLL.ServiceExtension
             // Managers (business services) — depend on abstractions only.
             services.AddScoped<ICategoryManager, CategoryManager>();
             services.AddScoped<IListingManager, ListingManager>();
+            services.AddScoped<IOrderManager, OrderManager>(); // السطر اللي ضفناه
 
             // FluentValidation validators.
             services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();
