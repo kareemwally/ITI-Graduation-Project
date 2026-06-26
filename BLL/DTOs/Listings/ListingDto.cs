@@ -5,7 +5,7 @@ namespace BLL.DTOs.Listings
     /// <summary>Lightweight projection used in listing collections / search results.</summary>
     public class ListingDto
     {
-        public int Id { get; set; }
+        public int Id { get; set;}
         public int FactoryId { get; set; }
         public int? CategoryId { get; set; }
         public string Title { get; set; } = null!;
