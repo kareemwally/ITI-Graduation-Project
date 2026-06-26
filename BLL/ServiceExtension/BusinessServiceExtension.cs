@@ -24,6 +24,7 @@ namespace BLL.ServiceExtension
 
             services.AddScoped<ICategoryManager, CategoryManager>();
             services.AddScoped<IListingManager, ListingManager>();
+            services.AddScoped<IOrderManager, OrderManager>(); // السطر اللي ضفناه
 
             services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();
             services.AddScoped<IAuthService, AuthService>();
