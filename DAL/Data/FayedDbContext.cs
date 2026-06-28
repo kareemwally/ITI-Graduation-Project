@@ -1,5 +1,7 @@
-using DAL.Models;
+﻿using DAL.Models;
 using DAL.Models.Common;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Data
@@ -8,17 +10,13 @@ namespace DAL.Data
     /// EF Core context for the Fayed B2B marketplace. All entity mappings live in
     /// <c>DAL.Data.Configurations</c> and are applied automatically from the assembly.
     /// </summary>
-    public class FayedDbContext : DbContext
+    public class FayedDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public FayedDbContext(DbContextOptions<FayedDbContext> options) : base(options)
         {
         }
 
-        // Auth & Users
-        public DbSet<User> Users => Set<User>();
-        public DbSet<Role> Roles => Set<Role>();
-        public DbSet<UserRole> UserRoles => Set<UserRole>();
-
+        
         // Geography
         public DbSet<Governorate> Governorates => Set<Governorate>();
         public DbSet<City> Cities => Set<City>();
@@ -54,7 +52,9 @@ namespace DAL.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // سطر أساسي وجوهري جداً عشان جداول الأيدنتيتي تترسم وتبني علاقاتها الداخلية صح قبل أي كود تاني
             base.OnModelCreating(modelBuilder);
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(FayedDbContext).Assembly);
         }
 
