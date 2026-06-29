@@ -1,0 +1,35 @@
+name: CI
+
+# Validate every change before MonsterASP auto-deploys it.
+# MonsterASP (connected to this repo) handles the actual deployment on push;
+# this workflow's job is to make sure the code compiles and publishes cleanly first.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build & publish (validation)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      # Building the API project transitively builds BLL and DAL.
+      - name: Restore
+        run: dotnet restore Fayed-API/Fayed-API.csproj
+
+      - name: Build (Release)
+        run: dotnet build Fayed-API/Fayed-API.csproj --configuration Release --no-restore
+
+      # Mirrors what MonsterASP does on deploy, so a publish failure is caught here.
+      - name: Publish (smoke test)
+        run: dotnet publish Fayed-API/Fayed-API.csproj --configuration Release --no-build --output ./publish
