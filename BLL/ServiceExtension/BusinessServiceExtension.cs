@@ -1,4 +1,5 @@
 using BLL.Managers;
+using BLL.ServiceExtension;
 using BLL.Managers.AuthenticationManager;
 using BLL.Managers.AuthnticationManager;
 using BLL.Managers.CloudinaryManager;
@@ -24,7 +25,11 @@ namespace BLL.ServiceExtension
 
             services.AddScoped<ICategoryManager, CategoryManager>();
             services.AddScoped<IListingManager, ListingManager>();
-            services.AddScoped<IOrderManager, OrderManager>(); // السطر اللي ضفناه
+            services.AddScoped<IOrderManager, OrderManager>();
+
+            // AI Service & HttpClient
+            services.AddHttpClient();
+            services.AddScoped<IAiSearchService, AiSearchService>();
 
             services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();
             services.AddScoped<IAuthService, AuthService>();

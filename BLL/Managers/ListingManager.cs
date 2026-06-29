@@ -1,10 +1,11 @@
-using BLL.DTOs.Common;
+﻿using BLL.DTOs.Common;
 using BLL.DTOs.Listings;
 using BLL.Mapping;
 using DAL.Models;
 using DAL.Models.Enums;
 using DAL.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BLL.Managers
 {
@@ -103,6 +104,61 @@ namespace BLL.Managers
             repo.Remove(entity); // soft delete handled by the DbContext
             await _uow.SaveChangesAsync();
             return true;
+        }
+
+
+        async Task<PagedResult<ListingDto>> IListingManager.SearchListingsAsync(ListingSearchParametersDto searchParams)
+        {
+            var query = _uow.Repository<Listing>().Query().AsNoTracking().Where(l => !l.IsDeleted && l.Status!=ListingStatus.Draft);
+
+            if (searchParams.CategoryId.HasValue)
+                query = query.Where(l => l.CategoryId == searchParams.CategoryId.Value);
+
+            if (searchParams.GovernorateId.HasValue)
+                query = query.Where(l => l.Factory.GovernorateId == searchParams.GovernorateId.Value);
+            if (searchParams.MinQuantity.HasValue)
+                query = query.Where(l => l.Quantity >= searchParams.MinQuantity.Value);
+
+            if (searchParams.MaxQuantity.HasValue)
+                query = query.Where(l => l.Quantity <= searchParams.MaxQuantity.Value);
+
+            if (searchParams.MinPrice.HasValue)
+                query = query.Where(l => l.Price >= searchParams.MinPrice.Value);
+
+            if (searchParams.MaxPrice.HasValue)
+                query = query.Where(l => l.Price <= searchParams.MaxPrice.Value);
+
+            // 3. الترتيب (Sorting)
+            query = searchParams.SortBy?.ToLower() switch
+            {
+                "price_asc" => query.OrderBy(l => l.Price),
+                "price_desc" => query.OrderByDescending(l => l.Price),
+                "oldest" => query.OrderBy(l => l.CreatedAt),
+                _ => query.OrderByDescending(l => l.CreatedAt) // الافتراضي: الأحدث أولاً
+            };
+
+            // 4. الباجنيشن (Pagination)
+            var totalCount = await query.CountAsync(); // بنعد هما كام نتيجة في الداتا بيز
+
+            var entities = await query
+                .Skip((searchParams.PageNumber - 1) * searchParams.PageSize)
+                .Take(searchParams.PageSize)
+                .ToListAsync(); // التنفيذ الفعلي في الداتا بيز بيحصل هنا
+
+            // 5. بنحول الـ Entity لـ DTO ونرجعه للفرونت
+            return new PagedResult<ListingDto>
+            {
+                Items = entities.Select(l => l.ToDto()).ToList(),
+                Page = searchParams.PageNumber,
+                PageSize = searchParams.PageSize,
+                TotalCount = totalCount
+            };
+
+
+
+
+
+
         }
     }
 }

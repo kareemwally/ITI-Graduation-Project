@@ -1,5 +1,6 @@
 using BLL.DTOs.Common;
 using BLL.DTOs.Listings;
+using System.Threading.Tasks;
 
 namespace BLL.Managers
 {
@@ -12,5 +13,6 @@ namespace BLL.Managers
         Task<bool> UpdateAsync(int id, UpdateListingDto dto);
         Task<bool> PublishAsync(int id);
         Task<bool> DeleteAsync(int id);
+        Task<PagedResult<ListingDto>> SearchListingsAsync(ListingSearchParametersDto searchParams);
     }
 }
