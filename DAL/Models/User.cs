@@ -1,17 +1,13 @@
+//using Microsoft.AspNetCore.Identity;
 using DAL.Models.Common;
 using DAL.Models.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace DAL.Models
 {
-    /// <summary>
-    /// Central account record. Anyone who enters the platform (factory owner or staff) has one row here.
-    /// </summary>
-    public class User : BaseEntity, ISoftDeletable
+    public class User : IdentityUser<int>, ISoftDeletable
     {
         public string Name { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public string PasswordHash { get; set; } = null!;
-        public string PhoneNumber { get; set; } = null!;
         public string? NationalId { get; set; }
         public VerificationStatus VerificationStatus { get; set; } = VerificationStatus.Pending;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -19,10 +15,11 @@ namespace DAL.Models
         public bool IsDeleted { get; set; }
         public DateTime? DeletedAt { get; set; }
 
-        // Navigation
-        public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        // Navigation Properties
         public Factory? Factory { get; set; }
         public Wallet? Wallet { get; set; }
+
+        
         public ICollection<SavedListing> SavedListings { get; set; } = new List<SavedListing>();
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
         public ICollection<AISearchLog> AISearchLogs { get; set; } = new List<AISearchLog>();

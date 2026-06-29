@@ -29,16 +29,7 @@ namespace DAL.Data.Configurations
                    .HasForeignKey<Factory>(f => f.UserId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(f => f.Governorate)
-                   .WithMany(g => g.Factories)
-                   .HasForeignKey(f => f.GovernorateId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(f => f.City)
-                   .WithMany(c => c.Factories)
-                   .HasForeignKey(f => f.CityId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
+            
             builder.HasQueryFilter(f => !f.IsDeleted);
         }
     }

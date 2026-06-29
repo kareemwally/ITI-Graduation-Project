@@ -1,5 +1,9 @@
 using BLL.Managers;
-using BLL.ServiceExtension; // السطر ده ضفناه عشان يشوف فولدر الـ Services
+using BLL.ServiceExtension;
+using BLL.Managers.AuthenticationManager;
+using BLL.Managers.AuthnticationManager;
+using BLL.Managers.CloudinaryManager;
+using BLL.Managers.EmailService;
 using BLL.Validators;
 using DAL.ServiceExtension;
 using FluentValidation;
@@ -17,10 +21,8 @@ namespace BLL.ServiceExtension
         public static IServiceCollection AddBusinessLogicLayer(
             this IServiceCollection services, IConfiguration configuration)
         {
-            // Bring in the DAL (DbContext, repositories, unit of work).
             services.AddDataAccessLayer(configuration);
 
-            // Managers (business services) — depend on abstractions only.
             services.AddScoped<ICategoryManager, CategoryManager>();
             services.AddScoped<IListingManager, ListingManager>();
             services.AddScoped<IOrderManager, OrderManager>();
@@ -29,8 +31,10 @@ namespace BLL.ServiceExtension
             services.AddHttpClient();
             services.AddScoped<IAiSearchService, AiSearchService>();
 
-            // FluentValidation validators.
             services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<ICloudinaryService, CloudinaryService>();
 
             return services;
         }

@@ -1,4 +1,6 @@
 using DAL.Repos;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DAL.UnitOfWork
 {
@@ -9,7 +11,7 @@ namespace DAL.UnitOfWork
     public interface IUnitOfWork : IAsyncDisposable
     {
         IGenericRepository<T> Repository<T>() where T : class;
-
+        Task<IDbContextTransaction> BeginTransactionAsync();
         Task<int> SaveChangesAsync();
     }
 }

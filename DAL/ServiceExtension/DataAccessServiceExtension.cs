@@ -25,6 +25,7 @@ namespace DAL.ServiceExtension
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
 
+
             return services;
         }
     }
