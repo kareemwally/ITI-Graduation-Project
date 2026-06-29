@@ -19,5 +19,12 @@ namespace BLL.AI.Abstractions
         public bool ExpectJson { get; set; }
 
         public int MaxOutputTokens { get; set; } = 1024;
+
+        /// <summary>
+        /// Optional per-call model id. When set it overrides the provider's configured default —
+        /// e.g. a cheap fast model for smart search vs a stronger one for document verification,
+        /// both through the same gateway.
+        /// </summary>
+        public string? ModelOverride { get; set; }
     }
 }
