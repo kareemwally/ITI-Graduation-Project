@@ -1,4 +1,5 @@
 using BLL.Managers;
+using BLL.ServiceExtension; // السطر ده ضفناه عشان يشوف فولدر الـ Services
 using BLL.Validators;
 using DAL.ServiceExtension;
 using FluentValidation;
@@ -22,7 +23,11 @@ namespace BLL.ServiceExtension
             // Managers (business services) — depend on abstractions only.
             services.AddScoped<ICategoryManager, CategoryManager>();
             services.AddScoped<IListingManager, ListingManager>();
-            services.AddScoped<IOrderManager, OrderManager>(); // السطر اللي ضفناه
+            services.AddScoped<IOrderManager, OrderManager>();
+
+            // AI Service & HttpClient
+            services.AddHttpClient();
+            services.AddScoped<IAiSearchService, AiSearchService>();
 
             // FluentValidation validators.
             services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();

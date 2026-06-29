@@ -10,7 +10,10 @@ namespace Fayed_API
 
             // Presentation services.
             builder.Services.AddControllers();
-            builder.Services.AddOpenApi();
+
+            // 1. تسجيل خدمات السواجر هنا بدل الـ OpenApi
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
             // Wire up the application layers (BLL pulls in the DAL).
             // This is the single composition root for IoC — each layer registers its own services.
@@ -21,7 +24,9 @@ namespace Fayed_API
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+                // 2. تشغيل واجهة السواجر الخضرا
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
