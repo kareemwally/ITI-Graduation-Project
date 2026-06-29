@@ -1,6 +1,7 @@
 using BLL.DTOs.Common;
 using BLL.DTOs.Verification;
 using BLL.Managers.Verification;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -8,6 +9,7 @@ namespace Fayed_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")] // KYB verification is a back-office (admin) area
     public class VerificationController : ControllerBase
     {
         private readonly IVerificationManager _verificationManager;
