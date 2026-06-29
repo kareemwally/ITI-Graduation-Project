@@ -1,5 +1,6 @@
 using BLL.DTOs.Common;
 using BLL.DTOs.Verification;
+using DAL.Models.Enums;
 
 namespace BLL.Managers.Verification
 {
@@ -14,5 +15,12 @@ namespace BLL.Managers.Verification
 
         /// <summary>Returns the AI result stored for a given verification case, if any.</summary>
         Task<BaseResponse<AiVerificationResultDto>> GetResultByCaseAsync(int verificationCaseId);
+
+        /// <summary>
+        /// Records a human officer's final decision: closes the case, sets the factory's
+        /// verification status, and writes an audit log entry.
+        /// </summary>
+        Task<BaseResponse<VerificationCaseDto>> DecideCaseAsync(
+            int verificationCaseId, int reviewerId, VerificationDecision decision, string? notes);
     }
 }

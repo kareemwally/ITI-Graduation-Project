@@ -75,6 +75,8 @@ officer can review them):
              → AIVerificationResult saved on a VerificationCase (Status = UnderReview)
 3. Read      GET  /api/verification/cases/{caseId}/ai-result
    List docs GET  /api/documents/factories/{factoryId}
+4. Decide    POST /api/verification/cases/{caseId}/decision   (officer: Approved/Rejected + notes)
+             → closes the case, sets Factory.VerificationStatus, writes an AuditLog
 ```
 
 - `AIVerificationResult` holds extracted fields, confidence score, mismatches, and an

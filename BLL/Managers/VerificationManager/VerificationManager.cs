@@ -126,6 +126,61 @@ namespace BLL.Managers.Verification
             return BaseResponse<AiVerificationResultDto>.Success(ToDto(result, verificationCaseId, factoryId));
         }
 
+        public async Task<BaseResponse<VerificationCaseDto>> DecideCaseAsync(
+            int verificationCaseId, int reviewerId, VerificationDecision decision, string? notes)
+        {
+            var caseRepo = _uow.Repository<VerificationCase>();
+            var verificationCase = await caseRepo.GetByIdAsync(verificationCaseId);
+            if (verificationCase is null)
+                return BaseResponse<VerificationCaseDto>.Failure("Verification case not found.", statusCode: 404);
+
+            var reviewer = await _uow.Repository<User>().GetByIdAsync(reviewerId);
+            if (reviewer is null)
+                return BaseResponse<VerificationCaseDto>.Failure("Reviewer (officer) not found.", statusCode: 400);
+
+            var factory = await _uow.Repository<Factory>().GetByIdAsync(verificationCase.FactoryId);
+            if (factory is null)
+                return BaseResponse<VerificationCaseDto>.Failure("Factory not found.", statusCode: 404);
+
+            // Close the case with the human decision.
+            verificationCase.Status = VerificationCaseStatus.Decided;
+            verificationCase.Decision = decision;
+            verificationCase.ReviewerId = reviewerId;
+            verificationCase.Notes = notes ?? verificationCase.Notes;
+            verificationCase.DecidedAt = DateTime.UtcNow;
+            caseRepo.Update(verificationCase);
+
+            // Reflect the decision on the factory.
+            factory.VerificationStatus = decision == VerificationDecision.Approved
+                ? VerificationStatus.Verified
+                : VerificationStatus.Rejected;
+            _uow.Repository<Factory>().Update(factory);
+
+            // Immutable audit trail of the admin action.
+            var audit = new AuditLog
+            {
+                AdminId = reviewerId,
+                Action = decision == VerificationDecision.Approved ? "approve_kyb" : "reject_kyb",
+                TargetEntity = "Factory",
+                TargetId = factory.Id,
+                Payload = JsonSerializer.Serialize(new
+                {
+                    verificationCaseId,
+                    decision = decision.ToString(),
+                    notes,
+                    factoryVerificationStatus = factory.VerificationStatus.ToString()
+                }),
+                CreatedAt = DateTime.UtcNow
+            };
+            await _uow.Repository<AuditLog>().AddAsync(audit);
+
+            await _uow.SaveChangesAsync();
+
+            return BaseResponse<VerificationCaseDto>.Success(
+                ToCaseDto(verificationCase, factory.VerificationStatus.ToString().ToLowerInvariant()),
+                "Verification decision recorded.");
+        }
+
         private async Task<VerificationCase> GetOrCreateOpenCaseAsync(int factoryId)
         {
             var cases = await _uow.Repository<VerificationCase>()
@@ -233,6 +288,19 @@ Rules:
             Recommendation = e.AIRecommendation.ToString().ToLowerInvariant(),
             ModelVersion = e.ModelVersion,
             CreatedAt = e.CreatedAt
+        };
+
+        private static VerificationCaseDto ToCaseDto(VerificationCase c, string factoryVerificationStatus) => new()
+        {
+            Id = c.Id,
+            FactoryId = c.FactoryId,
+            Status = c.Status.ToString(),
+            Decision = c.Decision?.ToString(),
+            ReviewerId = c.ReviewerId,
+            Notes = c.Notes,
+            CreatedAt = c.CreatedAt,
+            DecidedAt = c.DecidedAt,
+            FactoryVerificationStatus = factoryVerificationStatus
         };
 
         private sealed class AnalysisResult
