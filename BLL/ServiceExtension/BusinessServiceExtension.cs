@@ -7,6 +7,7 @@ using BLL.Managers.AiManager;
 using BLL.Managers.AuthenticationManager;
 using BLL.Managers.AuthnticationManager;
 using BLL.Managers.CloudinaryManager;
+using BLL.Managers.Documents;
 using BLL.Managers.EmailService;
 using BLL.Managers.Verification;
 using BLL.Validators;
@@ -44,6 +45,7 @@ namespace BLL.ServiceExtension
             services.AddScoped<IAiSearchService, AiSearchService>();
             services.AddScoped<ISmartSearchManager, SmartSearchManager>();
             services.AddScoped<IVerificationManager, VerificationManager>();
+            services.AddScoped<IDocumentManager, DocumentManager>();
 
             services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();
             services.AddScoped<IAuthService, AuthService>();

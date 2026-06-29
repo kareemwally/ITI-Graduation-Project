@@ -62,16 +62,27 @@ version) for analytics.
 > Fixes the previous bug where the Gemini request URL was a malformed markdown link, which made
 > every smart search silently return empty results.
 
-## 2. AI factory verification (KYB)
+## 2. AI factory verification (KYB) — end to end
 
-- `POST /api/verification/factories/{factoryId}/ai-run` — analyzes the factory's uploaded
-  documents, extracts the key fields, cross-checks them against the company's declared data,
-  and stores an **`AIVerificationResult`** (extracted fields, confidence score, mismatches,
-  approve/review/reject recommendation, model version) attached to a `VerificationCase`.
-- `GET /api/verification/cases/{caseId}/ai-result` — returns the stored AI result for a case.
+Flow (store-first, then verify — documents are kept regardless of the AI outcome so a human
+officer can review them):
 
-The verification result is a 1..1 with `VerificationCase`; re-running replaces the previous AI
-result (delete-old/add-new) so the verification history per case is preserved.
+```
+1. Upload    POST /api/documents/factories/{factoryId}      (multipart: file + documentType)
+             → Cloudinary → Document row saved
+2. Verify    POST /api/verification/factories/{factoryId}/ai-run
+             → downloads the docs → base64 → AI gateway (vision model) → extract + cross-check
+             → AIVerificationResult saved on a VerificationCase (Status = UnderReview)
+3. Read      GET  /api/verification/cases/{caseId}/ai-result
+   List docs GET  /api/documents/factories/{factoryId}
+```
+
+- `AIVerificationResult` holds extracted fields, confidence score, mismatches, and an
+  approve/review/reject recommendation + model version.
+- The recommendation is **advisory**: it moves the case to `UnderReview`; the final
+  approve/reject decision is a human officer action (the AI never auto-approves a factory).
+- The result is 1..1 with `VerificationCase`; re-running replaces the previous AI result
+  (delete-old/add-new) so each verification attempt's history is preserved.
 
 ## Notes
 
