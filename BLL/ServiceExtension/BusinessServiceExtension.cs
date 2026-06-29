@@ -34,6 +34,7 @@ namespace BLL.ServiceExtension
 
             // AI provider abstraction — swap Gemini/Claude/... purely via the "Ai:Provider" config key.
             services.AddHttpClient();
+            services.AddScoped<IAiProvider, ItiGatewayAiProvider>();
             services.AddScoped<IAiProvider, GeminiAiProvider>();
             services.AddScoped<IAiProvider, ClaudeAiProvider>();
             services.AddScoped<IAiProviderResolver, AiProviderResolver>();

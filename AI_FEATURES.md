@@ -15,20 +15,40 @@ IDocumentContentFetcher← downloads KYB documents (image/PDF) for multimodal an
 Adding a new provider = add one class implementing `IAiProvider`, register it, done
 (Open/Closed + Dependency Inversion). Business code only ever talks to `IAiProviderResolver`.
 
+Registered providers: `ItiGateway` (default), `Gemini`, `Claude`.
+
 ### Switching providers
 
 In `appsettings.json`:
 
 ```jsonc
 "Ai": {
-  "Provider": "Gemini",        // change to "Claude" (or any registered provider) to switch
+  "Provider": "ItiGateway",    // change to "Gemini" / "Claude" to switch — no code changes
+  "ItiGateway": {
+    "BaseUrl": "http://apiaccess.iti.net.eg/student", // OpenAI-compatible Chat Completions gateway
+    "ApiKey": "<your ITI key>",
+    "Model": "anthropic.claude-sonnet-4-6"
+  },
   "Gemini": { "ApiKey": "...", "Model": "gemini-1.5-flash" },
   "Claude": { "ApiKey": "...", "Model": "claude-sonnet-4-6" }
 }
 ```
 
-Flip `Ai:Provider` to `Claude`, set its key, restart — everything (smart search + verification)
-now runs on Claude.
+Flip `Ai:Provider`, set the key, restart — everything (smart search + verification) runs on the
+new provider.
+
+### Model choice (ITI gateway)
+
+The gateway exposes Bedrock models behind one key. Recommended:
+
+| Feature | Model | Why |
+|---|---|---|
+| Verification (KYB) | `anthropic.claude-sonnet-4-6` | Multimodal — reads document images/PDFs — and very reliable structured JSON |
+| Smart search | `anthropic.claude-sonnet-4-6` (or `anthropic.claude-haiku-4-5-20251001-v1:0` for lower cost/latency) | Text → JSON filters |
+
+Verification **requires a vision-capable model**; text-only models (DeepSeek, gpt-oss, Llama)
+cannot read the documents. A per-call `ModelOverride` on `AiCompletionRequest` lets a cheaper
+model be used for search while verification stays on Sonnet, all through the same gateway.
 
 ## 1. Smart search
 
