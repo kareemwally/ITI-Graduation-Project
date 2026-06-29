@@ -1,10 +1,11 @@
 using BLL.DTOs.Common;
 using BLL.DTOs.Listings;
 using BLL.Managers;
-using BLL.ServiceExtension; // ضفنا دي عشان يشوف فولدر الـ Services بتاعكم
+using BLL.Managers.AiManager;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Fayed_API.Controllers
@@ -15,16 +16,16 @@ namespace Fayed_API.Controllers
     {
         private readonly IListingManager _listingManager;
         private readonly IValidator<CreateListingDto> _createValidator;
-        private readonly IAiSearchService _aiSearchService; // تعريف خدمة الذكاء الاصطناعي
+        private readonly ISmartSearchManager _smartSearchManager; // AI-powered smart search (+ logging)
 
         public ListingsController(
             IListingManager listingManager,
             IValidator<CreateListingDto> createValidator,
-            IAiSearchService aiSearchService) // حقن الخدمة هنا
+            ISmartSearchManager smartSearchManager)
         {
             _listingManager = listingManager;
             _createValidator = createValidator;
-            _aiSearchService = aiSearchService;
+            _smartSearchManager = smartSearchManager;
         }
 
         [HttpGet]
@@ -70,10 +71,10 @@ namespace Fayed_API.Controllers
             => await _listingManager.DeleteAsync(id) ? NoContent() : NotFound();
 
         // ========================================================
-        // ( Endpoints الخاصة بالبحث الجديد (عادي + ذكي)
+        //  Search endpoints (filtered + AI smart search)
         // ========================================================
 
-        // 1. البحث العادي بالفلاتر (القايمة اللي ع اليمين)
+        // 1. Filtered search (the side filter panel).
         [HttpGet("search")]
         public async Task<ActionResult<PagedResult<ListingDto>>> SearchListings([FromQuery] ListingSearchParametersDto searchParams)
         {
@@ -81,24 +82,24 @@ namespace Fayed_API.Controllers
             return Ok(result);
         }
 
-        // 2. البحث الذكي باستخدام الذكاء الاصطناعي (مربع البحث الذكي اللي فوق)
+        // 2. AI smart search (the free-text box). Parses the prompt into filters, searches,
+        //    and logs the attempt to AISearchLogs.
         [HttpPost("smart-search")]
         public async Task<ActionResult<PagedResult<ListingDto>>> SmartSearch([FromBody] SmartSearchRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Query))
-                return BadRequest("يجب إدخال نص للبحث");
+                return BadRequest("A search prompt is required.");
 
-            // الـ AI بياخد الكلام يحلله ويحوله لـ DTO مليان فلاتر
-            var aiFilters = await _aiSearchService.ParseSearchQueryAsync(request.Query);
+            var userId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid)
+                ? uid
+                : (int?)null;
 
-            // بناخد الفلاتر اللي طلعت ونبعتها للـ Manager اللي بيكلم الداتا بيز
-            var result = await _listingManager.SearchListingsAsync(aiFilters);
-
+            var result = await _smartSearchManager.SmartSearchAsync(request.Query, userId);
             return Ok(result);
         }
     }
 
-    // كلاس خفيف ومؤقت عشان نستقبل فيه جملة البحث من الفرونت إند
+    // Lightweight request body for the smart-search prompt coming from the front end.
     public class SmartSearchRequest
     {
         public string Query { get; set; } = string.Empty;

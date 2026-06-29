@@ -1,31 +1,29 @@
-﻿using BLL.DTOs.Listings;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using BLL.AI;
+using BLL.AI.Abstractions;
+using BLL.DTOs.Listings;
 
 namespace BLL.ServiceExtension
 {
-    public class AiSearchService:IAiSearchService
+    /// <summary>
+    /// Turns a free-text (Arabic or English) search prompt into structured listing filters.
+    /// It depends only on <see cref="IAiProviderResolver"/>, so the underlying model (Gemini,
+    /// Claude, ...) can be swapped from configuration without touching this code.
+    /// </summary>
+    public class AiSearchService : IAiSearchService
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _apiKey;
+        private readonly IAiProviderResolver _providerResolver;
 
-        public AiSearchService(HttpClient httpClient , IConfiguration config)
+        public AiSearchService(IAiProviderResolver providerResolver)
         {
-            _httpClient = httpClient;
-            _apiKey = config["Gemini:ApiKey"] ?? throw new ArgumentNullException("Gemini API Key is missing");
-
+            _providerResolver = providerResolver;
         }
+
         public async Task<ListingSearchParametersDto> ParseSearchQueryAsync(string userQuery)
         {
-            // 1. Bulletproof English Prompt
-            string systemPrompt = @"You are a smart search assistant for a B2B Industrial Symbiosis marketplace.
-Your strict task is to extract search parameters from the user's input (which may be in Arabic or English) and return them EXCLUSIVELY as a raw, valid JSON object. 
-DO NOT wrap the response in markdown blocks (e.g., no ```json). DO NOT add any conversational text or explanations.
+            const string systemPrompt = @"You are a smart search assistant for a B2B Industrial Symbiosis marketplace.
+Your strict task is to extract search parameters from the user's input (which may be in Arabic or English) and return them EXCLUSIVELY as a raw, valid JSON object.
+DO NOT wrap the response in markdown blocks. DO NOT add any conversational text or explanations.
 If a specific filter is not mentioned in the user's request, set its value to null.
 
 Here is the EXACT JSON structure you must return:
@@ -44,51 +42,33 @@ Guidelines for mapping text to IDs (use these exact IDs if you detect the corres
 
 Return ONLY the JSON object.";
 
-            string fullPrompt = $"{systemPrompt}\n\nUser Request: {userQuery}";
+            var provider = _providerResolver.GetActiveProvider();
 
-            // 2. بنجهز الريكويست اللي رايح لجوجل (Gemini 1.5 Flash السريع)
-            var requestBody = new
+            ListingSearchParametersDto? searchParams = null;
+            try
             {
-                contents = new[]
+                var raw = await provider.CompleteAsync(new AiCompletionRequest
                 {
-            new { parts = new[] { new { text = fullPrompt } } }
+                    SystemPrompt = systemPrompt,
+                    UserPrompt = $"User Request: {userQuery}",
+                    ExpectJson = true,
+                    MaxOutputTokens = 512
+                });
+
+                searchParams = JsonSerializer.Deserialize<ListingSearchParametersDto>(
+                    AiJson.Clean(raw),
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch
+            {
+                // On any AI/parse failure, fall back to an empty filter set so search still works
+                // (it simply returns the latest listings) instead of failing the request.
+                searchParams = null;
+            }
+
+            searchParams ??= new ListingSearchParametersDto();
+            searchParams.SearchTerm = userQuery;
+            return searchParams;
         }
-            };
-
-            string jsonBody = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-
-            // 3. بنكلم الـ API
-            string url = $"[https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=](https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=){_apiKey}";
-            var response = await _httpClient.PostAsync(url, content);
-
-            if (!response.IsSuccessStatusCode)
-                return new ListingSearchParametersDto(); // لو حصل إيرور نرجع أوبجكت فاضي عشان السيرفر ميضربش
-
-            // 4. بنقرأ الرد ونطلع منه الـ JSON
-            var responseString = await response.Content.ReadAsStringAsync();
-            var jsonDocument = JsonDocument.Parse(responseString);
-
-            var aiTextResponse = jsonDocument.RootElement
-                .GetProperty("candidates")[0]
-                .GetProperty("content")
-                .GetProperty("parts")[0]
-                .GetProperty("text").GetString();
-
-            // 5. بننضف الرد لزيادة التأكيد (عشان لو الموديل عاند وبعت markdown)
-            aiTextResponse = aiTextResponse?.Replace("```json", "").Replace("```", "").Trim();
-
-            // 6. بنحول الـ JSON لكلاس الـ DTO بتاعنا
-            var searchParams = JsonSerializer.Deserialize<ListingSearchParametersDto>(
-                aiTextResponse ?? "{}",
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-            );
-
-            if (searchParams != null)
-                searchParams.SearchTerm = userQuery;
-
-            return searchParams ?? new ListingSearchParametersDto();
-        }
-
     }
 }

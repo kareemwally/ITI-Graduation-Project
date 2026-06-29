@@ -1,9 +1,14 @@
 using BLL.Managers;
 using BLL.ServiceExtension;
+using BLL.AI;
+using BLL.AI.Abstractions;
+using BLL.AI.Providers;
+using BLL.Managers.AiManager;
 using BLL.Managers.AuthenticationManager;
 using BLL.Managers.AuthnticationManager;
 using BLL.Managers.CloudinaryManager;
 using BLL.Managers.EmailService;
+using BLL.Managers.Verification;
 using BLL.Validators;
 using DAL.ServiceExtension;
 using FluentValidation;
@@ -27,9 +32,17 @@ namespace BLL.ServiceExtension
             services.AddScoped<IListingManager, ListingManager>();
             services.AddScoped<IOrderManager, OrderManager>();
 
-            // AI Service & HttpClient
+            // AI provider abstraction — swap Gemini/Claude/... purely via the "Ai:Provider" config key.
             services.AddHttpClient();
+            services.AddScoped<IAiProvider, GeminiAiProvider>();
+            services.AddScoped<IAiProvider, ClaudeAiProvider>();
+            services.AddScoped<IAiProviderResolver, AiProviderResolver>();
+            services.AddScoped<IDocumentContentFetcher, HttpDocumentContentFetcher>();
+
+            // AI features
             services.AddScoped<IAiSearchService, AiSearchService>();
+            services.AddScoped<ISmartSearchManager, SmartSearchManager>();
+            services.AddScoped<IVerificationManager, VerificationManager>();
 
             services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();
             services.AddScoped<IAuthService, AuthService>();
