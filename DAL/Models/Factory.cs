@@ -9,8 +9,8 @@ namespace DAL.Models
     public class Factory : BaseEntity, ISoftDeletable
     {
         public int UserId { get; set; }
+        public int? CityId { get; set; }
 
-            
         public string LegalName { get; set; } = null!;
         public string CommercialRegistryNo { get; set; } = null!;
         public string TaxCardNo { get; set; } = null!;
@@ -24,6 +24,7 @@ namespace DAL.Models
 
         // Navigation
         public User Owner { get; set; } = null!;
+        public City? City { get; set; }
         public ICollection<Document> Documents { get; set; } = new List<Document>();
         public ICollection<Listing> Listings { get; set; } = new List<Listing>();
         public ICollection<VerificationCase> VerificationCases { get; set; } = new List<VerificationCase>();
