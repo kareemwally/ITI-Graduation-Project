@@ -33,12 +33,12 @@ Here is the EXACT JSON structure you must return:
    ""MinPrice"": null,
    ""MaxPrice"": null,
    ""CategoryId"": null,
-   ""GovernorateId"": null
+   ""Location"": null
 }
 
-Guidelines for mapping text to IDs (use these exact IDs if you detect the corresponding meaning):
-- CategoryId: Plastic/بلاستيك=1, Metal/Iron/معادن/حديد=2, Paper/Carton/ورق/كرتون=3.
-- GovernorateId: Cairo/القاهرة=1, Alexandria/الإسكندرية=2, Dakahlia/Mansoura/الدقهلية/المنصورة=3.
+Guidelines:
+- CategoryId (map text to these exact IDs): Plastic/بلاستيك=1, Metal/Iron/معادن/حديد=2, Paper/Carton/ورق/كرتون=3.
+- Location: extract the place/city/governorate name mentioned (Arabic or English) as plain text, e.g. ""Cairo"" or ""القاهرة"". Do NOT convert it to an ID.
 
 Return ONLY the JSON object.";
 

@@ -9,8 +9,9 @@ namespace BLL.DTOs.Listings
     public class ListingSearchParametersDto
     {
         public string? SearchTerm { set; get; }
-        public int? CategoryId { get; set; } 
-        public int? GovernorateId { get; set; }
+        public int? CategoryId { get; set; }
+        /// <summary>Free-text location to match against the factory's address (e.g. "Cairo" / "القاهرة").</summary>
+        public string? Location { get; set; }
         public decimal?MinQuantity { get; set; }
         public decimal? MaxQuantity { get; set; }
         public decimal? MinPrice { get; set; }
