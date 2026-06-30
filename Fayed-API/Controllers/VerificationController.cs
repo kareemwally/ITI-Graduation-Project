@@ -28,13 +28,13 @@ namespace Fayed_API.Controllers
         [Authorize(Roles = "Factory")]
         [RequestSizeLimit(30_000_000)] // a few 5 MB docs in one request
         public async Task<IActionResult> ExtractFromUpload(
-            int factoryId, [FromForm] List<IFormFile> files, CancellationToken cancellationToken)
+            int factoryId, [FromForm] KybExtractRequest request, CancellationToken cancellationToken)
         {
             if (!TryGetUserId(out var userId))
                 return Unauthorized(BaseResponse.Failure("Invalid token.", statusCode: 401));
 
             var response = await _verificationManager.ExtractFromUploadAsync(
-                factoryId, userId, files, cancellationToken);
+                factoryId, userId, request.Files, cancellationToken);
             return StatusCode(response.StatusCode, response);
         }
 
@@ -45,14 +45,13 @@ namespace Fayed_API.Controllers
         [Authorize(Roles = "Factory")]
         [RequestSizeLimit(30_000_000)]
         public async Task<IActionResult> ConfirmAndStore(
-            int factoryId, [FromForm] List<IFormFile> files, [FromForm] KybConfirmRequest request,
-            CancellationToken cancellationToken)
+            int factoryId, [FromForm] KybConfirmRequest request, CancellationToken cancellationToken)
         {
             if (!TryGetUserId(out var userId))
                 return Unauthorized(BaseResponse.Failure("Invalid token.", statusCode: 401));
 
             var response = await _verificationManager.ConfirmAndStoreAsync(
-                factoryId, userId, files, request, cancellationToken);
+                factoryId, userId, request.Files, request, cancellationToken);
             return StatusCode(response.StatusCode, response);
         }
 

@@ -114,8 +114,8 @@ namespace BLL.Managers
             if (searchParams.CategoryId.HasValue)
                 query = query.Where(l => l.CategoryId == searchParams.CategoryId.Value);
 
-            if (searchParams.GovernorateId.HasValue)
-                query = query.Where(l => l.Factory.City!.GovernorateId == searchParams.GovernorateId.Value);
+            if (!string.IsNullOrWhiteSpace(searchParams.Location))
+                query = query.Where(l => l.Factory.Address.Contains(searchParams.Location));
             if (searchParams.MinQuantity.HasValue)
                 query = query.Where(l => l.Quantity >= searchParams.MinQuantity.Value);
 

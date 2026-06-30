@@ -1,12 +1,17 @@
+using Microsoft.AspNetCore.Http;
+
 namespace BLL.DTOs.Verification
 {
     /// <summary>
-    /// Body of the "confirm" step. The frontend re-sends the same documents (as multipart files)
+    /// multipart/form-data body of the "confirm" step. The frontend re-sends the same documents
     /// plus the AI extraction result it previously received and approved, which is then persisted
     /// alongside the stored documents.
     /// </summary>
     public class KybConfirmRequest
     {
+        /// <summary>The documents to store, re-sent from the extract step.</summary>
+        public List<IFormFile> Files { get; set; } = new();
+
         /// <summary>The JSON object of fields returned by the extract step.</summary>
         public string ExtractedFields { get; set; } = "{}";
 
