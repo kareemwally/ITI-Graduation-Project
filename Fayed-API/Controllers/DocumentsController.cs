@@ -1,3 +1,4 @@
+using BLL.DTOs.Documents;
 using BLL.Managers.Documents;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,9 +20,10 @@ namespace Fayed_API.Controllers
         [HttpPost("factories/{factoryId:int}")]
         [RequestSizeLimit(20_000_000)] // 20 MB
         public async Task<IActionResult> UploadFactoryDocument(
-            int factoryId, [FromForm] IFormFile file, [FromForm] string documentType)
+            int factoryId, [FromForm] UploadFactoryDocumentRequest request)
         {
-            var response = await _documentManager.UploadFactoryDocumentAsync(factoryId, file, documentType);
+            var response = await _documentManager.UploadFactoryDocumentAsync(
+                factoryId, request.File, request.DocumentType);
             return StatusCode(response.StatusCode, response);
         }
 
