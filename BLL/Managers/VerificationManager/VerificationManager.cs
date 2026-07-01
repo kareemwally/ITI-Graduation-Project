@@ -268,13 +268,17 @@ namespace BLL.Managers.Verification
             IReadOnlyList<(string type, string label)> descriptors,
             CancellationToken cancellationToken = default)
         {
+            // The owner's declared name + national id live on the User, not the Factory — pull them
+            // so the model can cross-check the national ID document too.
+            var owner = await _uow.Repository<User>().GetByIdAsync(factory.UserId);
+
             var provider = _providerResolver.GetActiveProvider();
             try
             {
                 var raw = await provider.CompleteAsync(new AiCompletionRequest
                 {
                     SystemPrompt = BuildSystemPrompt(),
-                    UserPrompt = BuildUserPrompt(factory, descriptors),
+                    UserPrompt = BuildUserPrompt(factory, owner?.Name, owner?.NationalId, descriptors),
                     Attachments = attachments,
                     ExpectJson = true,
                     MaxOutputTokens = 1500
@@ -354,25 +358,48 @@ namespace BLL.Managers.Verification
 
         private static string BuildSystemPrompt() =>
 @"You are a KYB (Know-Your-Business) verification officer for an Egyptian industrial marketplace.
-You are given a company's self-declared data and images/PDFs of its official documents
-(commercial registry, tax card, ...). Read the documents, extract the key fields, and compare
-them to the declared data.
+You are given a company's self-declared data and images/PDFs of its official documents. The
+documents may include a commercial registry extract, a tax card, the owner's national ID, and an
+owner selfie holding the ID. Identify what each attached document is, then extract every field
+below from whichever document carries it, and compare the result to the declared data.
 
 Return EXCLUSIVELY a single raw JSON object (no markdown, no prose) with this exact shape:
 {
-  ""extractedFields"": { ""legalName"": null, ""commercialRegistryNo"": null, ""taxCardNo"": null, ""address"": null },
+  ""extractedFields"": {
+    ""legalName"": null,
+    ""commercialRegistryNo"": null,
+    ""taxCardNo"": null,
+    ""address"": null,
+    ""governorate"": null,
+    ""sector"": null,
+    ""ownerName"": null,
+    ""nationalId"": null,
+    ""establishmentDate"": null,
+    ""capital"": null
+  },
   ""confidenceScore"": 0.0,
   ""mismatches"": [ { ""field"": "".."", ""declared"": "".."", ""found"": "".."" } ],
   ""recommendation"": ""approve""
 }
 
-Rules:
-- confidenceScore is a number between 0 and 1.
-- recommendation must be one of: approve, review, reject.
-- If a field cannot be read, set it to null. If there are no mismatches, return an empty array.
-- Recommend 'reject' for clear mismatches, 'review' for low confidence or missing documents, 'approve' otherwise.";
+Where each field typically appears:
+- legalName, commercialRegistryNo, address, governorate, sector, establishmentDate, capital -> commercial registry.
+- taxCardNo (and a second copy of legalName / address / sector) -> tax card.
+- ownerName, nationalId -> national ID document.
+- the owner selfie carries no text; use it only to judge authenticity, not field extraction.
 
-        private static string BuildUserPrompt(Factory factory, IReadOnlyList<(string type, string label)> descriptors)
+Rules:
+- confidenceScore is a number between 0 and 1: your overall confidence that the documents are authentic and consistent with the declared data.
+- recommendation must be one of: approve, review, reject.
+- Extract each value in its original language exactly as printed (Arabic or English). Do not translate.
+- governorate is the Egyptian governorate implied by the address (e.g. ""Cairo"" / ""القاهرة"").
+- If a field cannot be read in any document, set it to null.
+- Add one mismatch entry for every declared value that conflicts with what you found (compare legalName, commercialRegistryNo, taxCardNo, address, sector, ownerName, nationalId). Return an empty array when everything matches.
+- Recommend 'reject' for clear conflicts (different registry/tax number, different name or national id), 'review' for low confidence or missing/unreadable documents, 'approve' otherwise.";
+
+        private static string BuildUserPrompt(
+            Factory factory, string? ownerName, string? ownerNationalId,
+            IReadOnlyList<(string type, string label)> descriptors)
         {
             var sb = new StringBuilder();
             sb.AppendLine("Company self-declared data:");
@@ -381,6 +408,8 @@ Rules:
             sb.AppendLine($"- TaxCardNo: {factory.TaxCardNo}");
             sb.AppendLine($"- Sector: {factory.Sector}");
             sb.AppendLine($"- Address: {factory.Address}");
+            sb.AppendLine($"- OwnerName: {ownerName ?? "(not provided)"}");
+            sb.AppendLine($"- NationalId: {ownerNationalId ?? "(not provided)"}");
             sb.AppendLine();
             sb.AppendLine($"Attached documents ({descriptors.Count} total, up to {MaxDocumentsAnalyzed} analyzed):");
             foreach (var (type, label) in descriptors)
