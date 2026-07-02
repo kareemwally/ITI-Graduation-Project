@@ -1,15 +1,15 @@
-using BLL.DTOs.Categories;
+﻿using BLL.DTOs.Categories;
+using BLL.DTOs.Common;
 
 namespace BLL.Managers
 {
-    /// <summary>Business operations for the catalog category tree.</summary>
     public interface ICategoryManager
     {
-        Task<IReadOnlyList<CategoryDto>> GetAllAsync();
-        Task<IReadOnlyList<CategoryDto>> GetTreeAsync();
-        Task<CategoryDto?> GetByIdAsync(int id);
-        Task<CategoryDto> CreateAsync(CreateCategoryDto dto);
-        Task<bool> UpdateAsync(int id, UpdateCategoryDto dto);
-        Task<bool> DeleteAsync(int id);
+        Task<BaseResponse<List<CategoryDto>>> GetAllAsync();
+        Task<BaseResponse<List<CategoryDto>>> GetTreeAsync();
+        Task<BaseResponse<CategoryDto>> GetByIdAsync(int id);
+        Task<BaseResponse<CategoryDto>> CreateAsync(CreateCategoryDto dto);
+        Task<BaseResponse<bool>> UpdateAsync(int id, UpdateCategoryDto dto);
+        Task<BaseResponse<bool>> DeleteAsync(int id);
     }
 }

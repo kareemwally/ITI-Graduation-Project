@@ -192,24 +192,59 @@ namespace DAL.Migrations
                         new
                         {
                             Id = 5,
+                            Name = "Glass"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Paper / Cardboard"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Wood"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Rubber"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "Leather"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "Electronics / E-Scrap"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "Construction / Demolition"
+                        },
+                        new
+                        {
+                            Id = 12,
                             Name = "Steel Scrap",
                             ParentId = 1
                         },
                         new
                         {
-                            Id = 6,
+                            Id = 13,
                             Name = "Aluminium Scrap",
                             ParentId = 1
                         },
                         new
                         {
-                            Id = 7,
+                            Id = 14,
                             Name = "PET",
                             ParentId = 2
                         },
                         new
                         {
-                            Id = 8,
+                            Id = 15,
                             Name = "HDPE",
                             ParentId = 2
                         });
@@ -273,6 +308,49 @@ namespace DAL.Migrations
                     b.HasIndex("GovernorateId", "Name");
 
                     b.ToTable("Cities", (string)null);
+                });
+
+            modelBuilder.Entity("DAL.Models.Dispute", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RaisedById")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("RaisedById");
+
+                    b.ToTable("Disputes");
                 });
 
             modelBuilder.Entity("DAL.Models.Document", b =>
@@ -558,6 +636,10 @@ namespace DAL.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<string>("CertificateUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -602,6 +684,10 @@ namespace DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<decimal>("MaxPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("MeasureUnit")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -611,14 +697,17 @@ namespace DAL.Migrations
                         .HasPrecision(18, 3)
                         .HasColumnType("decimal(18,3)");
 
+                    b.Property<decimal>("MinPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("PreferPayMethod")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<DateTime?>("PublishedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("Quantity")
                         .HasPrecision(18, 3)
@@ -634,6 +723,10 @@ namespace DAL.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("VideoUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
@@ -641,6 +734,8 @@ namespace DAL.Migrations
                     b.HasIndex("CreatedAt");
 
                     b.HasIndex("FactoryId");
+
+                    b.HasIndex("PublishedAt");
 
                     b.HasIndex("MaterialType", "Status", "CategoryId");
 
@@ -773,15 +868,15 @@ namespace DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("AgreedPricePerUnit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("AgreedQuantity")
                         .HasPrecision(18, 3)
                         .HasColumnType("decimal(18,3)");
 
                     b.Property<decimal>("AgreedTotalPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("BuyerCommissionShare")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
@@ -792,24 +887,54 @@ namespace DAL.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("BuyerTotalDue")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<DateTime?>("BuyerSignedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("CommissionRate")
                         .HasPrecision(5, 4)
                         .HasColumnType("decimal(5,4)");
 
+                    b.Property<DateTime?>("ContractGeneratedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ContractTerms")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContractUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DeclineReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DeliveryAddress")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("DeliveryDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("DeliveryType")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("DownPaymentAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DownPaymentPercentage")
+                        .HasPrecision(5, 4)
+                        .HasColumnType("decimal(5,4)");
+
+                    b.Property<DateTime?>("EscrowReleaseAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -817,8 +942,24 @@ namespace DAL.Migrations
                     b.Property<bool>("IsDetailsRevealed")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDisputed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDownPaymentPaid")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSignedByBuyer")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSignedBySeller")
+                        .HasColumnType("bit");
+
                     b.Property<int>("ListingId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("PlatformCommission")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ProposedByRole")
                         .HasMaxLength(20)
@@ -827,16 +968,15 @@ namespace DAL.Migrations
                     b.Property<string>("ProposedModification")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("SellerCommissionShare")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("SellerId")
                         .HasColumnType("int");
 
                     b.Property<decimal?>("SellerPenaltyAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("SellerSignedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("SellerTotalPayout")
                         .HasPrecision(18, 2)
@@ -1331,6 +1471,25 @@ namespace DAL.Migrations
                     b.Navigation("Governorate");
                 });
 
+            modelBuilder.Entity("DAL.Models.Dispute", b =>
+                {
+                    b.HasOne("DAL.Models.Order", "Order")
+                        .WithMany("Disputes")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Models.User", "RaisedBy")
+                        .WithMany()
+                        .HasForeignKey("RaisedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("RaisedBy");
+                });
+
             modelBuilder.Entity("DAL.Models.Document", b =>
                 {
                     b.HasOne("DAL.Models.Factory", "Factory")
@@ -1635,6 +1794,8 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("DAL.Models.Order", b =>
                 {
+                    b.Navigation("Disputes");
+
                     b.Navigation("Documents");
 
                     b.Navigation("Reviews");

@@ -1,8 +1,8 @@
-using BLL.DTOs.Categories;
+﻿using BLL.DTOs.Categories;
+using BLL.DTOs.Common;
 using BLL.Managers;
-using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Fayed_API.Controllers
 {
@@ -11,56 +11,55 @@ namespace Fayed_API.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryManager _categoryManager;
-        private readonly IValidator<CreateCategoryDto> _createValidator;
 
-        public CategoriesController(
-            ICategoryManager categoryManager,
-            IValidator<CreateCategoryDto> createValidator)
+        public CategoriesController(ICategoryManager categoryManager)
         {
             _categoryManager = categoryManager;
-            _createValidator = createValidator;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<CategoryDto>>> GetAll()
-            => Ok(await _categoryManager.GetAllAsync());
+        public async Task<IActionResult> GetAll()
+        {
+            var response = await _categoryManager.GetAllAsync();
+            return StatusCode(response.StatusCode, response);
+        }
 
         [HttpGet("tree")]
-        public async Task<ActionResult<IReadOnlyList<CategoryDto>>> GetTree()
-            => Ok(await _categoryManager.GetTreeAsync());
+        public async Task<IActionResult> GetTree()
+        {
+            var response = await _categoryManager.GetTreeAsync();
+            return StatusCode(response.StatusCode, response);
+        }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<CategoryDto>> GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var category = await _categoryManager.GetByIdAsync(id);
-            return category is null ? NotFound() : Ok(category);
+            var response = await _categoryManager.GetByIdAsync(id);
+            return StatusCode(response.StatusCode, response);
         }
 
         [HttpPost]
-        public async Task<ActionResult<CategoryDto>> Create(CreateCategoryDto dto)
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> Create([FromBody] CreateCategoryDto dto)
         {
-            var validation = await _createValidator.ValidateAsync(dto);
-            if (!validation.IsValid)
-                return ValidationProblem(ToModelState(validation));
-
-            var created = await _categoryManager.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            var response = await _categoryManager.CreateAsync(dto);
+            return StatusCode(response.StatusCode, response);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, UpdateCategoryDto dto)
-            => await _categoryManager.UpdateAsync(id, dto) ? NoContent() : NotFound();
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDto dto)
+        {
+            var response = await _categoryManager.UpdateAsync(id, dto);
+            return StatusCode(response.StatusCode, response);
+        }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
-            => await _categoryManager.DeleteAsync(id) ? NoContent() : NotFound();
-
-        private static ModelStateDictionary ToModelState(FluentValidation.Results.ValidationResult result)
         {
-            var modelState = new ModelStateDictionary();
-            foreach (var error in result.Errors)
-                modelState.AddModelError(error.PropertyName, error.ErrorMessage);
-            return modelState;
+            var response = await _categoryManager.DeleteAsync(id);
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

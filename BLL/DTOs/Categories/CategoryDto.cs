@@ -1,4 +1,4 @@
-namespace BLL.DTOs.Categories
+﻿namespace BLL.DTOs.Categories
 {
     public class CategoryDto
     {

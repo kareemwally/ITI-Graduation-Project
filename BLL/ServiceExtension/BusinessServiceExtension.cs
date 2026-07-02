@@ -1,9 +1,9 @@
-using BLL.Managers;
-using BLL.Managers.AuthenticationManager;
-using BLL.Managers.AuthnticationManager;
+﻿using BLL.Managers;
+using BLL.Managers.Authentication;
 using BLL.Managers.CloudinaryManager;
 using BLL.Managers.EmailService;
-using BLL.Validators;
+using BLL.Managers.UsersDashboard;
+using BLL.Validators.Listings;
 using DAL.ServiceExtension;
 using FluentValidation;
 using Microsoft.Extensions.Configuration;
@@ -11,10 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BLL.ServiceExtension
 {
-    /// <summary>
-    /// Composition root for the Business Logic Layer. It also pulls in the Data Access Layer so the
-    /// API only needs a single call (<c>AddBusinessLogicLayer</c>) — each layer owns its own wiring.
-    /// </summary>
     public static class BusinessServiceExtension
     {
         public static IServiceCollection AddBusinessLogicLayer(
@@ -24,12 +20,39 @@ namespace BLL.ServiceExtension
 
             services.AddScoped<ICategoryManager, CategoryManager>();
             services.AddScoped<IListingManager, ListingManager>();
-            services.AddScoped<IOrderManager, OrderManager>(); // السطر اللي ضفناه
+
+            // Order management
+            services.AddScoped<IOfferManager, OfferManager>();
+            services.AddScoped<IOrderManager, OrderManager>();
+
+            // Chat
+            services.AddScoped<IChatManager, ChatManager>();
+
+            // Notifications
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationManager, NotificationManager>();
+
+            // Contracts & Payments
+            services.AddScoped<IContractManager, ContractManager>();
+
+            // Disputes
+            services.AddScoped<IDisputeManager, DisputeManager>();
+
+            // Profile
+            services.AddScoped<IProfileManager, ProfileManager>();
+
+            // Payment service — switch between Simulated and Paymob here
+            var usePaymob = configuration.GetValue<bool>("PaymobSettings:UsePaymob");
+            if (usePaymob)
+                services.AddScoped<IPaymentService, PaymobPaymentService>();
+            else
+                services.AddScoped<IPaymentService, SimulatedPaymentService>();
 
             services.AddValidatorsFromAssemblyContaining<CreateListingDtoValidator>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<ICloudinaryService, CloudinaryService>();
+            services.AddScoped<IDashboardService, DashboardService>();
 
             return services;
         }

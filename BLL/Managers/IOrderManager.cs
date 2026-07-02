@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BLL.DTOs.Common;
 using BLL.DTOs.Orders;
-using BLL.DTOs.Common;
-using DAL.Models.Enums;
+using BLL.DTOs.UserDashboard;
+
 namespace BLL.Managers
 {
     public interface IOrderManager
     {
-        Task<OrderDetailsDto> CreateAsync(CreateOrderDto dto);
-        Task<OrderDetailsDto?> GetByIdAsync(int id);
-        Task<PagedResult<OrderDto>> GetOrdersByFactoryAsync(int factoryId, int page, int pageSize);
-        Task<bool> UpdateStatusAsync(int id, OrderStatus newStatus);
+        Task<BaseResponse<OrderDetailsDto>> CreateAsync(CreateOrderDto dto);
+        Task<BaseResponse<OrderDetailsDto>> GetByIdAsync(int id);
+
+        Task<BaseResponse<List<ConfirmedOrderDashboardDto>>> GetMyPurchasesAsync(int currentUserId);
+        Task<BaseResponse<List<ConfirmedOrderDashboardDto>>> GetMySalesAsync(int currentUserId);
+
+        Task<BaseResponse<ActiveOrderDetailDto>> GetActiveOrderDetailAsync(int orderId, int currentUserId);
+        Task<BaseResponse<bool>> CancelOrderAsync(int orderId, int currentUserId);
+        Task<BaseResponse<bool>> CompleteOrderAsync(int orderId, int currentUserId);
     }
 }

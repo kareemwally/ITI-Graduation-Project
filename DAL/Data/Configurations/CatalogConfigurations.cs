@@ -1,4 +1,4 @@
-using DAL.Models;
+﻿using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,10 +24,17 @@ namespace DAL.Data.Configurations
                 new Category { Id = 2, ParentId = null, Name = "Plastics" },
                 new Category { Id = 3, ParentId = null, Name = "Textiles" },
                 new Category { Id = 4, ParentId = null, Name = "Chemicals" },
-                new Category { Id = 5, ParentId = 1, Name = "Steel Scrap" },
-                new Category { Id = 6, ParentId = 1, Name = "Aluminium Scrap" },
-                new Category { Id = 7, ParentId = 2, Name = "PET" },
-                new Category { Id = 8, ParentId = 2, Name = "HDPE" }
+                new Category { Id = 5, ParentId = null, Name = "Glass" },
+                new Category { Id = 6, ParentId = null, Name = "Paper / Cardboard" },
+                new Category { Id = 7, ParentId = null, Name = "Wood" },
+                new Category { Id = 8, ParentId = null, Name = "Rubber" },
+                new Category { Id = 9, ParentId = null, Name = "Leather" },
+                new Category { Id = 10, ParentId = null, Name = "Electronics / E-Scrap" },
+                new Category { Id = 11, ParentId = null, Name = "Construction / Demolition" },
+                new Category { Id = 12, ParentId = 1, Name = "Steel Scrap" },
+                new Category { Id = 13, ParentId = 1, Name = "Aluminium Scrap" },
+                new Category { Id = 14, ParentId = 2, Name = "PET" },
+                new Category { Id = 15, ParentId = 2, Name = "HDPE" }
             );
         }
     }
@@ -46,7 +53,11 @@ namespace DAL.Data.Configurations
                    .HasConversion<string>().HasMaxLength(20).IsRequired();
             builder.Property(l => l.Quantity).HasPrecision(18, 3).IsRequired();
             builder.Property(l => l.MeasureUnit).IsRequired().HasMaxLength(20);
-            builder.Property(l => l.Price).HasPrecision(18, 2).IsRequired();
+
+            // 🎯 التعديل الأول: شيلنا الـ Price القديم وضفنا نطاق السعر الجديد (من وإلى)
+            builder.Property(l => l.MinPrice).HasPrecision(18, 2).IsRequired();
+            builder.Property(l => l.MaxPrice).HasPrecision(18, 2).IsRequired();
+
             builder.Property(l => l.MinOrderQuantity).HasPrecision(18, 3).IsRequired();
             builder.Property(l => l.DeliveryType)
                    .HasConversion<string>().HasMaxLength(20).IsRequired();
@@ -56,11 +67,17 @@ namespace DAL.Data.Configurations
             builder.Property(l => l.Status)
                    .HasConversion<string>().HasMaxLength(20).IsRequired();
             builder.Property(l => l.CreatedAt).IsRequired();
+            builder.Property(l => l.PublishedAt).IsRequired(false);
             builder.Property(l => l.ExpiryDate).IsRequired();
+
+            // 🚀 التعديل الثاني: إضافة الـ URLs الخاصة بالفيديو والشهادة (اختيارية كـ Nullable وبحجم ماكس 500 حرف)
+            builder.Property(l => l.VideoUrl).HasMaxLength(500).IsRequired(false);
+            builder.Property(l => l.CertificateUrl).HasMaxLength(500).IsRequired(false);
 
             // Composite search index + recency index.
             builder.HasIndex(l => new { l.MaterialType, l.Status, l.CategoryId });
             builder.HasIndex(l => l.CreatedAt);
+            builder.HasIndex(l => l.PublishedAt);
 
             builder.HasOne(l => l.Factory)
                    .WithMany(f => f.Listings)
@@ -75,7 +92,6 @@ namespace DAL.Data.Configurations
             builder.HasQueryFilter(l => !l.IsDeleted);
         }
     }
-
     public class ListingMediaConfiguration : IEntityTypeConfiguration<ListingMedia>
     {
         public void Configure(EntityTypeBuilder<ListingMedia> builder)

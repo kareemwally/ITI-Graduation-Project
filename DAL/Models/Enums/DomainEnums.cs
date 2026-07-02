@@ -1,4 +1,4 @@
-namespace DAL.Models.Enums
+﻿namespace DAL.Models.Enums
 {
     /// <summary>Verification state shared by Users and Factories (KYB).</summary>
     public enum VerificationStatus
@@ -91,11 +91,12 @@ namespace DAL.Models.Enums
     /// <summary>Lifecycle of a confirmed order.</summary>
     public enum OrderStatus
     {
-        PendingPayment,
-        BuyerPaid,
-        PayoutSent,
-        Completed,
-        Cancelled
+        Pending = 1,         // عرض شراء معلق
+        InProgress = 2,      // قيد التشغيل (بعد قبول العرض أو استلام الدفع)
+        Completed = 3,        // مكتمل
+        Cancelled = 4,        // ملغي
+        ContractReview = 5,   // العقد قيد مراجعة المورد
+        PaymentPending = 6    // في انتظار دفع العربون من المشتري
     }
 
     /// <summary>Which party proposed a modification during negotiation.</summary>
@@ -123,5 +124,13 @@ namespace DAL.Models.Enums
         Completed,
         Failed,
         Reversed
+    }
+    /// <summary>Lifecycle of an order dispute / complaint.</summary>
+    public enum DisputeStatus
+    {
+        Opened,
+        UnderReview,
+        Resolved,
+        Cancelled
     }
 }

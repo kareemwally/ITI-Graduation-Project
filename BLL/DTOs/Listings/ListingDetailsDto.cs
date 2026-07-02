@@ -1,8 +1,7 @@
-using DAL.Models.Enums;
+﻿using DAL.Models.Enums;
 
 namespace BLL.DTOs.Listings
 {
-    /// <summary>Full listing representation including media.</summary>
     public class ListingDetailsDto : ListingDto
     {
         public string Description { get; set; } = null!;
@@ -12,6 +11,10 @@ namespace BLL.DTOs.Listings
         public DeliveryType DeliveryType { get; set; }
         public PaymentMethod PreferPayMethod { get; set; }
         public string? CustomCatName { get; set; }
+
+        public string? VideoUrl { get; set; }
+        public string? CertificateUrl { get; set; }
+
         public List<ListingMediaDto> Media { get; set; } = new();
     }
 

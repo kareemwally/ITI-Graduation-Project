@@ -1,21 +1,23 @@
-﻿using MimeKit;
+﻿using BLL.Settings;
+using Microsoft.Extensions.Options;
+using MimeKit;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 namespace BLL.Managers.EmailService
 {
     public class EmailService : IEmailService
     {
-        private readonly IConfiguration _configuration;
+        private readonly EmailSettings _settings;
 
-        public EmailService(IConfiguration configuration)
+        public EmailService(IOptions<EmailSettings> settings)
         {
-            _configuration = configuration;
+            _settings = settings.Value;
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage)
         {
             var emailMessage = new MimeMessage();
 
-            emailMessage.From.Add(new MailboxAddress("منصة فايد - Fayed Platform", _configuration["EmailSettings:SenderEmail"]!));
+            emailMessage.From.Add(new MailboxAddress("منصة فايد - Fayed Platform", _settings.SenderEmail));
 
             emailMessage.To.Add(new MailboxAddress("", toEmail));
 
@@ -27,14 +29,14 @@ namespace BLL.Managers.EmailService
             try
             {
                 await client.ConnectAsync(
-                    _configuration["EmailSettings:Server"]!,
-                    int.Parse(_configuration["EmailSettings:Port"]!),
+                    _settings.Server,
+                    _settings.Port,
                     MailKit.Security.SecureSocketOptions.StartTls
                 );
 
                 await client.AuthenticateAsync(
-                    _configuration["EmailSettings:Username"]!,
-                    _configuration["EmailSettings:Password"]!
+                    _settings.Username,
+                    _settings.Password
                 );
 
                 await client.SendAsync(emailMessage);

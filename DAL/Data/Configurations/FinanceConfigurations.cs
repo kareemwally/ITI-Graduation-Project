@@ -1,4 +1,4 @@
-using DAL.Models;
+﻿using DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,17 +11,23 @@ namespace DAL.Data.Configurations
             builder.ToTable("Orders");
             builder.HasKey(o => o.Id);
 
+            // حقول الكميات والأسعار والعمولة الموحدة
             builder.Property(o => o.AgreedQuantity).HasPrecision(18, 3).IsRequired();
             builder.Property(o => o.AgreedTotalPrice).HasPrecision(18, 2).IsRequired();
             builder.Property(o => o.CommissionRate).HasPrecision(5, 4).IsRequired();
-            builder.Property(o => o.BuyerCommissionShare).HasPrecision(18, 2).IsRequired();
-            builder.Property(o => o.SellerCommissionShare).HasPrecision(18, 2).IsRequired();
-            builder.Property(o => o.BuyerTotalDue).HasPrecision(18, 2).IsRequired();
+
+            // ✨ حقل عمولة المنصة الجديد الموحد
+            builder.Property(o => o.PlatformCommission).HasPrecision(18, 2).IsRequired();
             builder.Property(o => o.SellerTotalPayout).HasPrecision(18, 2).IsRequired();
             builder.Property(o => o.BuyerPenaltyAmount).HasPrecision(18, 2);
             builder.Property(o => o.SellerPenaltyAmount).HasPrecision(18, 2);
+
+            // ✨ حقل المقدم المالي الجديد
+            builder.Property(o => o.DownPaymentAmount).HasPrecision(18, 2).IsRequired();
+
+            // التحويلات الخاصة بالـ Enums والشروط
             builder.Property(o => o.DeliveryType)
-                   .HasConversion<string>().HasMaxLength(20).IsRequired();
+                   .HasConversion<string>().HasMaxLength(20);
             builder.Property(o => o.ProposedModification);
             builder.Property(o => o.ProposedByRole)
                    .HasConversion<string>().HasMaxLength(20);
@@ -29,6 +35,26 @@ namespace DAL.Data.Configurations
                    .HasConversion<string>().HasMaxLength(30).IsRequired();
             builder.Property(o => o.CreatedAt).IsRequired();
 
+            // ✨ حقول التحكم والـ Booleans الجديدة (مش محتاجة Precision لأنها داتا رقمية/تاريخ)
+            builder.Property(o => o.IsSignedByBuyer).IsRequired();
+            builder.Property(o => o.IsSignedBySeller).IsRequired();
+            builder.Property(o => o.IsDisputed).IsRequired();
+            builder.Property(o => o.IsDownPaymentPaid).IsRequired();
+            builder.Property(o => o.DeliveryDate); // nullable تاريخ شحن مانيوال
+
+            // ✨ حقول العقد الجديدة
+            builder.Property(o => o.ContractTerms).HasColumnType("nvarchar(max)");
+            builder.Property(o => o.ContractGeneratedAt);
+            builder.Property(o => o.SellerSignedAt);
+            builder.Property(o => o.BuyerSignedAt);
+            builder.Property(o => o.DeclineReason).HasMaxLength(500);
+            builder.Property(o => o.AgreedPricePerUnit).HasPrecision(18, 2).IsRequired();
+            builder.Property(o => o.DeliveryAddress).HasMaxLength(500);
+            builder.Property(o => o.DownPaymentPercentage).HasPrecision(5, 4).IsRequired();
+            builder.Property(o => o.EscrowReleaseAt);
+            builder.Property(o => o.ContractUrl).HasMaxLength(500);
+
+            // الـ Indexes والعلاقات (دون أي تغيير لضمان الأمان)
             builder.HasIndex(o => o.Status);
 
             builder.HasOne(o => o.Listing)

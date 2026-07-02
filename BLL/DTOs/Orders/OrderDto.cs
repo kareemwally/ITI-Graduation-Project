@@ -1,19 +1,14 @@
-﻿using DAL.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BLL.DTOs.Orders
+﻿namespace BLL.DTOs.Orders
 {
     public class OrderDto
     {
         public int Id { get; set; }
         public int ListingId { get; set; }
-        public int BuyerFactoryId { get; set; }
+        public int BuyerId { get; set; }
+        public int SellerId { get; set; }
+        public decimal AgreedQuantity { get; set; }
         public decimal TotalPrice { get; set; }
-        public OrderStatus Status { get; set; } 
+        public string Status { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
     }
 }

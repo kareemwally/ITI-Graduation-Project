@@ -1,14 +1,11 @@
-using BLL.DTOs.Categories;
-using BLL.Mapping;
+﻿using BLL.DTOs.Categories;
+using BLL.DTOs.Common;
+using BLL.Mapping.Categories;
 using DAL.Models;
 using DAL.UnitOfWork;
 
 namespace BLL.Managers
 {
-    /// <summary>
-    /// Depends only on <see cref="IUnitOfWork"/> (the DAL abstraction), never on EF Core directly,
-    /// so it stays testable and storage-agnostic (DIP).
-    /// </summary>
     public class CategoryManager : ICategoryManager
     {
         private readonly IUnitOfWork _uow;
@@ -18,13 +15,14 @@ namespace BLL.Managers
             _uow = uow;
         }
 
-        public async Task<IReadOnlyList<CategoryDto>> GetAllAsync()
+        public async Task<BaseResponse<List<CategoryDto>>> GetAllAsync()
         {
             var categories = await _uow.Repository<Category>().GetAllAsync();
-            return categories.Select(c => c.ToDto()).ToList();
+            var dtos = categories.Select(c => c.ToDto()).ToList();
+            return BaseResponse<List<CategoryDto>>.Success(dtos, "تم جلب جميع الفئات بنجاح.");
         }
 
-        public async Task<IReadOnlyList<CategoryDto>> GetTreeAsync()
+        public async Task<BaseResponse<List<CategoryDto>>> GetTreeAsync()
         {
             var all = (await _uow.Repository<Category>().GetAllAsync())
                 .Select(c => c.ToDto())
@@ -41,46 +39,49 @@ namespace BLL.Managers
                     roots.Add(node);
             }
 
-            return roots;
+            return BaseResponse<List<CategoryDto>>.Success(roots, "تم جلب شجرة الفئات بنجاح.");
         }
 
-        public async Task<CategoryDto?> GetByIdAsync(int id)
+        public async Task<BaseResponse<CategoryDto>> GetByIdAsync(int id)
         {
             var entity = await _uow.Repository<Category>().GetByIdAsync(id);
-            return entity?.ToDto();
+            if (entity is null)
+                return BaseResponse<CategoryDto>.Failure("هذه الفئة غير موجودة.", statusCode: 404);
+
+            return BaseResponse<CategoryDto>.Success(entity.ToDto(), "تم جلب الفئة بنجاح.");
         }
 
-        public async Task<CategoryDto> CreateAsync(CreateCategoryDto dto)
+        public async Task<BaseResponse<CategoryDto>> CreateAsync(CreateCategoryDto dto)
         {
             var entity = dto.ToEntity();
             await _uow.Repository<Category>().AddAsync(entity);
             await _uow.SaveChangesAsync();
-            return entity.ToDto();
+            return BaseResponse<CategoryDto>.Success(entity.ToDto(), "تم إنشاء الفئة بنجاح.", statusCode: 201);
         }
 
-        public async Task<bool> UpdateAsync(int id, UpdateCategoryDto dto)
+        public async Task<BaseResponse<bool>> UpdateAsync(int id, UpdateCategoryDto dto)
         {
             var repo = _uow.Repository<Category>();
             var entity = await repo.GetByIdAsync(id);
             if (entity is null)
-                return false;
+                return BaseResponse<bool>.Failure("هذه الفئة غير موجودة.", statusCode: 404);
 
             dto.Apply(entity);
             repo.Update(entity);
             await _uow.SaveChangesAsync();
-            return true;
+            return BaseResponse<bool>.Success(true, "تم تحديث الفئة بنجاح.");
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<BaseResponse<bool>> DeleteAsync(int id)
         {
             var repo = _uow.Repository<Category>();
             var entity = await repo.GetByIdAsync(id);
             if (entity is null)
-                return false;
+                return BaseResponse<bool>.Failure("هذه الفئة غير موجودة.", statusCode: 404);
 
             repo.Remove(entity);
             await _uow.SaveChangesAsync();
-            return true;
+            return BaseResponse<bool>.Success(true, "تم حذف الفئة بنجاح.");
         }
     }
 }

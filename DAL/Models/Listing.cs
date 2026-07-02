@@ -1,4 +1,4 @@
-using DAL.Models.Common;
+﻿using DAL.Models.Common;
 using DAL.Models.Enums;
 
 namespace DAL.Models
@@ -17,7 +17,11 @@ namespace DAL.Models
         public MaterialCondition MaterialCondition { get; set; }
         public decimal Quantity { get; set; }
         public string MeasureUnit { get; set; } = null!;
-        public decimal Price { get; set; }
+
+        //  التعديل: تحويل السعر لنطاق مرن (Range)
+        public decimal MinPrice { get; set; }
+        public decimal MaxPrice { get; set; }
+
         public decimal MinOrderQuantity { get; set; } = 1;
         public bool IsNegotiable { get; set; } = true;
         public bool IsDivisible { get; set; }
@@ -26,7 +30,12 @@ namespace DAL.Models
         public string? CustomCatName { get; set; }
         public ListingStatus Status { get; set; } = ListingStatus.Draft;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? PublishedAt { get; set; }
         public DateTime ExpiryDate { get; set; }
+
+        //  التعديل: إضافة الـ URLs الخاصة بالفيديو والشهادة الاختيارية
+        public string? VideoUrl { get; set; }
+        public string? CertificateUrl { get; set; }
 
         public bool IsDeleted { get; set; }
         public DateTime? DeletedAt { get; set; }

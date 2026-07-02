@@ -1,4 +1,4 @@
-namespace DAL.Models.Common
+﻿namespace DAL.Models.Common
 {
     /// <summary>
     /// Marker for critical entities (Users, Factories, Listings, Orders) that should be

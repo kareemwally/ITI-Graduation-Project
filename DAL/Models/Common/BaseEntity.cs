@@ -1,4 +1,4 @@
-namespace DAL.Models.Common
+﻿namespace DAL.Models.Common
 {
     /// <summary>
     /// Base type for every entity that owns a single integer identity column.

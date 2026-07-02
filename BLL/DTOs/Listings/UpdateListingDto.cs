@@ -1,3 +1,4 @@
+﻿using Microsoft.AspNetCore.Http;
 using DAL.Models.Enums;
 
 namespace BLL.DTOs.Listings
@@ -10,8 +11,12 @@ namespace BLL.DTOs.Listings
         public string MaterialType { get; set; } = null!;
         public MaterialCondition MaterialCondition { get; set; }
         public decimal Quantity { get; set; }
-        public string MeasureUnit { get; set; } = null!;
-        public decimal Price { get; set; }
+        public string MeasureUnit { get; set; } = "طن";
+
+        
+        public decimal MinPrice { get; set; }
+        public decimal MaxPrice { get; set; }
+
         public decimal MinOrderQuantity { get; set; }
         public bool IsNegotiable { get; set; }
         public bool IsDivisible { get; set; }
@@ -20,5 +25,9 @@ namespace BLL.DTOs.Listings
         public string? CustomCatName { get; set; }
         public ListingStatus Status { get; set; }
         public DateTime ExpiryDate { get; set; }
+
+        public List<IFormFile>? NewImages { get; set; }
+        public IFormFile? NewVideo { get; set; }
+        public IFormFile? NewCertificate { get; set; }
     }
 }

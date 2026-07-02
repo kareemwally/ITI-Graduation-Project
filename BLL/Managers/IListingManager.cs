@@ -1,4 +1,4 @@
-using BLL.DTOs.Common;
+﻿using BLL.DTOs.Common;
 using BLL.DTOs.Listings;
 
 namespace BLL.Managers
@@ -6,11 +6,13 @@ namespace BLL.Managers
     /// <summary>Business operations for marketplace listings.</summary>
     public interface IListingManager
     {
-        Task<PagedResult<ListingDto>> GetPublishedAsync(int page, int pageSize, string? materialType = null);
-        Task<ListingDetailsDto?> GetByIdAsync(int id);
-        Task<ListingDetailsDto> CreateAsync(CreateListingDto dto);
-        Task<bool> UpdateAsync(int id, UpdateListingDto dto);
-        Task<bool> PublishAsync(int id);
-        Task<bool> DeleteAsync(int id);
+        Task<BaseResponse<PagedResult<ListingDto>>> GetPublishedAsync(PublishedListingsFilterDto filter);
+        Task<BaseResponse<ListingDetailsDto>> GetByIdAsync(int id);
+        Task<BaseResponse<ListingDetailsDto>> CreateAsync(CreateListingDto dto);
+        Task<BaseResponse<bool>> UpdateAsync(int id, UpdateListingDto dto);
+        Task<BaseResponse<bool>> PublishAsync(int id);
+        Task<BaseResponse<bool>> DeleteAsync(int id);
+
+        Task<BaseResponse<List<ListingDto>>> GetByUserFactoryAsync(int userId);
     }
 }

@@ -50,6 +50,7 @@ namespace DAL.Data
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
+        public DbSet<Dispute> Disputes => Set<Dispute>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // سطر أساسي وجوهري جداً عشان جداول الأيدنتيتي تترسم وتبني علاقاتها الداخلية صح قبل أي كود تاني

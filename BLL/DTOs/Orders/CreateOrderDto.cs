@@ -9,8 +9,8 @@ namespace BLL.DTOs.Orders
     public class CreateOrderDto
     {
         public int ListingId { get; set; }
-        public int BuyerFactoryId { get; set; }
-        public int SellerFactoryId { get; set; }
+        public int BuyerId { get; set; }
+        public int SellerId { get; set; }
         public decimal Quantity { get; set; }
     }
 }

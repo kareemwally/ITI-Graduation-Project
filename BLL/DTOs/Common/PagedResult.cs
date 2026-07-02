@@ -1,4 +1,4 @@
-namespace BLL.DTOs.Common
+﻿namespace BLL.DTOs.Common
 {
     /// <summary>Generic paged response envelope for list endpoints.</summary>
     public class PagedResult<T>
