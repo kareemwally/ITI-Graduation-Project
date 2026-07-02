@@ -1,4 +1,5 @@
-﻿using DAL.Helpers;
+﻿using DAL.Data;
+using DAL.Helpers;
 using DAL.Models;
 using Microsoft.AspNetCore.Identity;
 
@@ -19,6 +20,13 @@ namespace Fayed_API.Extensions
 
                 // نداء ميثود السيرفر اللي عملناها في الـ DAL
                 await ContextSeed.SeedRolesAndAdminAsync(userManager, roleManager);
+
+                // تجهيز مصنع للتجارب في بيئة التطوير فقط
+                if (app.Environment.IsDevelopment())
+                {
+                    var context = services.GetRequiredService<FayedDbContext>();
+                    await ContextSeed.SeedDevFactoryAsync(userManager, context);
+                }
             }
             catch (Exception ex)
             {

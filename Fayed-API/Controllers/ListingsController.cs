@@ -1,7 +1,6 @@
 ﻿using BLL.DTOs.Common;
 using BLL.DTOs.Listings;
 using BLL.Managers;
-using DAL.Models.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

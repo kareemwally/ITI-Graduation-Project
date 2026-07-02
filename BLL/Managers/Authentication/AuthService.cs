@@ -141,8 +141,10 @@ namespace BLL.Managers.Authentication
         public async Task<BaseResponse<LoginResponseDto>> LoginAsync(FayedLoginRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
+            // Return the same error for "unknown email" and "wrong password" to avoid
+            // leaking which emails are registered (user enumeration).
             if (user == null)
-                throw new UserNotFoundException();
+                throw new InvalidLoginException();
 
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!isPasswordValid)

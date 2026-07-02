@@ -125,12 +125,28 @@
         Failed,
         Reversed
     }
-    /// <summary>Lifecycle of an order dispute / complaint.</summary>
     public enum DisputeStatus
     {
         Opened,
         UnderReview,
         Resolved,
         Cancelled
+    }
+
+    public enum DisputeReason
+    {
+        QualityIssue,
+        Delay,
+        NonPayment,
+        WrongQuantity,
+        Other
+    }
+
+    public enum OfferStatus
+    {
+        Pending,
+        Accepted,
+        Rejected,
+        Withdrawn
     }
 }

@@ -226,5 +226,29 @@ namespace BLL.Managers
             var dtos = entities.Select(l => l.ToDto()).ToList();
             return BaseResponse<List<ListingDto>>.Success(dtos, "تم جلب منتجات المصنع بنجاح.");
         }
+
+        async Task<PagedResult<ListingDto>> IListingManager.SearchListingsAsync(ListingSearchParametersDto searchParams)
+        {
+            var filter = new PublishedListingsFilterDto
+            {
+                CategoryId = searchParams.CategoryId,
+                Location = searchParams.Location,
+                MinQuantity = searchParams.MinQuantity,
+                MaxQuantity = searchParams.MaxQuantity,
+                MinPrice = searchParams.MinPrice,
+                MaxPrice = searchParams.MaxPrice,
+                SortDirection = searchParams.SortBy?.ToLower() switch
+                {
+                    "price_asc" => "asc",
+                    "price_desc" => "desc",
+                    _ => "desc"
+                },
+                Page = searchParams.PageNumber,
+                PageSize = searchParams.PageSize
+            };
+
+            var result = await GetPublishedAsync(filter);
+            return result.Data!;
+        }
     }
 }
