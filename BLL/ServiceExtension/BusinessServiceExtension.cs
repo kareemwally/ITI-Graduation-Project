@@ -27,6 +27,9 @@ namespace BLL.ServiceExtension
         public static IServiceCollection AddBusinessLogicLayer(
             this IServiceCollection services, IConfiguration configuration)
         {
+            // ضيف السطر ده عشان الـ Controller يعرف ينده على الـ PurchaseOfferManager
+            services.AddScoped<IPurchaseOfferManager, PurchaseOfferManager>();
+            //----------
             services.AddDataAccessLayer(configuration);
 
             services.AddScoped<ICategoryManager, CategoryManager>();

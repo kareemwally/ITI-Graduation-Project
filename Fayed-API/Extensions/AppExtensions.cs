@@ -21,8 +21,7 @@ namespace Fayed_API.Extensions
                 // نداء ميثود السيرفر اللي عملناها في الـ DAL
                 await ContextSeed.SeedRolesAndAdminAsync(userManager, roleManager);
 
-                // Development-only: a ready Factory owner so the AI verification endpoints can be
-                // tested (login -> extract) without registration + email confirmation.
+                // تجهيز مصنع للتجارب في بيئة التطوير فقط
                 if (app.Environment.IsDevelopment())
                 {
                     var context = services.GetRequiredService<FayedDbContext>();
