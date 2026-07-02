@@ -1,4 +1,5 @@
 ﻿using DAL.Data;
+using DAL.Helpers;
 using DAL.Models;
 using DAL.Models.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -26,7 +27,7 @@ namespace DAL.Helpers
             }
 
             var defaultAdminEmail = "admin@fayed.com";
-            
+
             var adminUser = await userManager.FindByEmailAsync(defaultAdminEmail);
             if (adminUser == null)
             {
@@ -37,7 +38,8 @@ namespace DAL.Helpers
                     Name = "Fayed Admin",
                     NationalId = "30157261502525",
                     EmailConfirmed = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    SecurityStamp = Guid.NewGuid().ToString() // <-- تم الإضافة هنا لضمان استقرار الـ Identity
                 };
 
                 var createAdminResult = await userManager.CreateAsync(admin, "FayedAdmin@2026");
@@ -69,7 +71,8 @@ namespace DAL.Helpers
                 NationalId = "29001011200345",
                 EmailConfirmed = true,
                 VerificationStatus = VerificationStatus.Pending,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                SecurityStamp = Guid.NewGuid().ToString() // <-- تم الإضافة هنا أيضاً
             };
 
             var result = await userManager.CreateAsync(user, "Factory@2026");

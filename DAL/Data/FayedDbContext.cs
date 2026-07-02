@@ -16,7 +16,8 @@ namespace DAL.Data
         {
         }
 
-        
+        public DbSet<PurchaseOffer> PurchaseOffers => Set<PurchaseOffer>();
+        public DbSet<Dispute> Disputes => Set<Dispute>();
         // Geography
         public DbSet<Governorate> Governorates => Set<Governorate>();
         public DbSet<City> Cities => Set<City>();

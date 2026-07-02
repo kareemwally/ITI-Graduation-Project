@@ -1,5 +1,5 @@
 ﻿using BLL.DTOs.Common;
-using DAL.Models.ExceptionModels; 
+using DAL.Models.ExceptionModels;
 using System.Net;
 using System.Text.Json;
 
@@ -42,6 +42,13 @@ namespace Fayed_API.CustomeMiddleWares
             {
                 _logger.LogError(ex, ex.Message);
 
+                // حماية إضافية: لو الـ Response بدأ يتبعت للعميل بالفعل، ما ينفعش نعدل فيه
+                if (context.Response.HasStarted)
+                {
+                    _logger.LogWarning("The response has already started, the exception middleware will not execute.");
+                    throw;
+                }
+
                 context.Response.ContentType = "application/json";
                 string json;
 
@@ -52,13 +59,19 @@ namespace Fayed_API.CustomeMiddleWares
                 {
                     context.Response.StatusCode = (int)businessEx.StatusCode;
                     message = businessEx.Message;
-                    errors = businessEx.Errors ?? [];
+
+                    // التعديل الأول: استبدال [] بـ new List<string> صريحة
+                    errors = businessEx.Errors ?? new List<string>();
                 }
                 else
                 {
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     message = _env.IsDevelopment() ? ex.Message : "حدث خطأ غير متوقع في الخادم، يرجى المحاولة لاحقاً.";
-                    errors = _env.IsDevelopment() ? [ex.StackTrace?.ToString() ?? ""] : [];
+
+                    // التعديل الثاني: استبدال [] عشان الـ Serialization ما يضربش
+                    errors = _env.IsDevelopment() && !string.IsNullOrEmpty(ex.StackTrace)
+                        ? new List<string> { ex.StackTrace }
+                        : new List<string>();
                 }
 
                 var response = BaseResponse.Failure(message, errors, context.Response.StatusCode);

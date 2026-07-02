@@ -41,5 +41,7 @@ namespace DAL.Models
         public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public ICollection<Document> Documents { get; set; } = new List<Document>();
+
+        public ICollection<Dispute> Disputes { get; set; } = new List<Dispute>();
     }
 }

@@ -124,4 +124,31 @@ namespace DAL.Models.Enums
         Failed,
         Reversed
     }
+    public enum DisputeStatus
+    {
+        Open,
+        underReview,
+        Resolved,
+        closed
+    }
+
+    public enum DisputeReason
+    {
+        QualityIssue,
+        delay,
+        Nonpayment,
+        wrongQuantity,
+        Other
+    }
+
+    public enum OfferStatus
+    {
+        pending,
+        Accepted,
+        Regjected,
+        Withdrawn
+    }
+
+
+
 }
